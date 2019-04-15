@@ -1,0 +1,57 @@
+﻿@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+}
+
+<head>
+    <link href="~/Content/Styles.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    
+    <script>
+    $(document).ready(function () {
+        $("#loginBtn").click(function () {
+            var basePath = '@Url.Content("~")';
+            var log = $("#login").val();
+            var password = $("#password").val();
+            var obj = { "login": log, "pswd": password };
+            var settings = {
+                type: "GET",
+                dataType: "json",
+                url: basePath + "api/User/Login",
+                data: obj,
+                success: function (r) {
+                    if (r != null) {
+                       var  uid = r.Id;
+                        window.localStorage.setItem('user', JSON.stringify(r));
+                        window.localStorage.setItem("pid", 0);
+                        sessionStorage.setItem("userName", r.Id);
+                       
+                        window.location.href = '@Url.Action("UserHome", "Home")';
+                    }
+                    else
+                        alert('invalid Login/Password');
+                },
+                error: function () {
+                    alert('some problem has occured');
+                }
+            };
+            $.ajax(settings);
+        });
+
+
+    });
+    </script>
+</head>
+
+<body>    
+   @* <div class="login-card">*@
+        
+        <form class="login-card">
+            <h1>Log-in</h1><br />
+            Login:<br><input type="text" id="login" name="login"  class="login" required>
+            Password:<br> <input type="password" id="password" name="password"  class="password" required>
+            <input type="submit" class="login login-submit" id="loginBtn"  name="loginBtn" value="login">
+        </form>       
+    
+</body>

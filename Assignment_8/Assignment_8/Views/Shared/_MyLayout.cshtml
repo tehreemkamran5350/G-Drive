@@ -1,0 +1,354 @@
+﻿@{
+    Layout = null;
+
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>_MyLayout</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+           
+            margin: 0;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        @* body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        *@ .topnav {
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        /* Style the topnav links */
+        .topnav a {
+            float: left;
+            display: block;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+            /* Change color on hover */
+            .topnav a:hover {
+                background-color: #ddd;
+                color: black;
+            }
+
+        /* Style the content */
+        .content {
+            background-color: #ddd;
+            padding: 10px;
+            height: 200px;
+        }
+
+        .overlay {
+            position: fixed;
+            display: none;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0;
+            z-index: 101;
+            background-color: #000000;
+            opacity: .15;
+            filter: alpha(opacity=15);
+            -moz-opacity: .15;
+        }
+
+        .web_dialog {
+            left: 50%;
+            top: 50%;
+            width: 200px;
+            height: 200px;
+            background-color: White;
+            /*border-color: Black;
+            border-style: solid;*/
+            z-index: 102;
+            display: none;
+            position: fixed;
+            margin-left: -100px;
+            margin-top: -100px;
+        }
+
+        .dialog_title {
+            background-color: Gray;
+            padding: 2px;
+            color: White;
+            border-bottom: solid 2px #336699;
+        }
+
+            .dialog_title a {
+                color: White;
+                text-align: right;
+            }
+
+        .align_right {
+            text-align: right;
+        }
+    </style>
+   
+    <script>
+        window.BasePath = '@Url.Content("~")';
+    </script>
+    @Styles.Render("~/Content/css")
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+   
+    @RenderSection("scripts", false)
+    <script>
+    $(document).ready(function () {
+
+        var u = JSON.parse(window.localStorage.getItem('user'));
+        console.log(u.Name);
+        var pid = window.localStorage.getItem("pid");
+        $("#h1").html($("#h1").html() + " " + u.Name);
+        var basePath = '@Url.Content("~")';
+
+        //file uploading
+        if (pid > 0)
+        {
+           
+            var link = $("<a>");
+            link.attr("href","#");
+            link.attr("id","lnkShowFile");
+            link.text("Upload File");           
+            $("#linkDiv").append(link);            
+        }
+        $('#lnkShowFile').click(function (event) {
+           
+            ShowFile();
+            //To stop actual/default functionality of the link
+            event.preventDefault();
+            return false;
+        });
+
+        $('#fileClose').click(function (e) {
+            HideFile();
+            e.preventDefault();
+        });
+
+       
+        $('#fileOK').click(function (e) {
+            if (pid > 0) {
+                debugger;
+                var obj = new FormData();
+                var files = $("#fileName").get(0).files;
+                if (files.length > 0) {
+                    obj.append("UploadedFile", files[0]);
+                }
+                obj.append("createdBy", u.UserID);
+                obj.append("parentFId", pid);
+
+                var ajaxRequest = $.ajax({
+                    type: "POST",                   
+                    url: "http://localhost:53881/api/File/uploadFile",
+                    contentType: false,
+                    processData: false,
+                    data: obj,
+                    success: function (r) {
+                        if (r>0) {
+                            alert("file uploaded")
+                            location.reload();
+                        }
+                        else
+                            alert('unable to upload file');
+                    },
+                    error: function () {
+                        alert('some problem has occured');
+                    }
+                });                          
+            }
+            HideFile();
+        });
+
+
+        function ShowFile() {
+
+           // $('#divoverlay').show();
+            $('#modal_file').slideDown(500);
+        }
+        function HideFile() {
+         //   $('#divoverlay').hide();
+            $('#modal_file').slideUp(500);
+        }
+
+
+
+
+
+        $('#lnkShowDialog').click(function (event) {
+            ShowDialog();
+            //To stop actual/default functionality of the link
+            event.preventDefault();
+            return false;
+        });
+
+        $('#lnkClose').click(function (e) {
+            HideDialog();
+            e.preventDefault();
+        });
+
+        $('#btnOK').click(function (e) {
+
+            var fName = $('#folderName').val();
+           
+            if (pid> 0) {
+                var obj = { "Name": fName, "CreatedBy": u.UserID,"parentId": pid};
+                var settings = {
+                    type: "GET",
+                    dataType: "json",
+                    url: basePath + "api/Folder/CreateChildFolder",
+                    data: obj,
+                    success: function (r) {
+                        if (r == true) {
+                            alert("folder created")
+                           
+                        }
+                        else
+                            alert('unable to create folder');
+                    },
+                    error: function () {
+                        alert('some problem has occured');
+                    }
+                };
+                $.ajax(settings);
+            }
+            else {
+                var obj = { "Name": fName, "CreatedBy": u.UserID };
+                var settings = {
+                    type: "GET",
+                    dataType: "json",
+                    url: basePath + "api/Folder/CreateFolder",
+                    data: obj,
+                    success: function (r) {
+                        if (r == true) {
+                            alert("folder created")
+                            @*window.location.href = '@Url.Action("UserHome", "Home")';*@
+                        }
+                        else
+                            alert('unable to create folder');
+                    },
+                    error: function () {
+                        alert('some problem has occured');
+                    }
+                };
+                $.ajax(settings);
+            }
+                HideDialog();
+            });
+
+  
+        function ShowDialog() {
+
+           // $('#divoverlay').show();
+            $('#modal_dialog').slideDown(500);
+        }
+        function HideDialog() {
+           // $('#divoverlay').hide();
+            $('#modal_dialog').slideUp(500);
+        }
+
+
+
+
+
+
+
+    });
+
+    </script>
+
+    
+</head>
+<body>
+
+    <div class="topnav">
+        <div id="linkDiv">
+            <a href="#" id="lnkShowDialog">Create New Folder</a>
+        </div>
+        
+        <a href="/User/Logout">Logout</a>
+
+
+    </div>
+    <div align="center">
+      @*  <h1> Welcome @Assignment_8.Security.SessionManager.User.Name</h1>*@
+        <h1 id="h1"> Welcome </h1>
+      
+        <span style="color:red">@TempData["Message"]</span>
+        
+    </div>
+    
+    @*<span id="spText"></span>*@
+
+    @*modal popup*@
+    <div id="modal_dialog" class="web_dialog">
+        <table style="width: 100%; border: 0px;" cellpadding="3" cellspacing="0">
+            <tr>
+                <td class="dialog_title">
+                    New Folder
+                </td>
+                <td class="dialog_title align_right">
+                    <a id="lnkClose" href="#">close</a>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="content">
+                        Folder Name:<input id="folderName" type="text" /><br>
+                        <button id="btnOK" value="Save">Save</button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    @*fileupload*@
+   
+        <div id="modal_file" class="web_dialog">
+            <table style="width: 100%; border: 0px;" cellpadding="3" cellspacing="0">
+                <tr>
+                    <td class="dialog_title">
+                        Modal Demo
+                    </td>
+                    <td class="dialog_title align_right">
+                        <a id="fileClose" href="#">close</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="content">
+                            Name:<input type="file" id="fileName" />
+                            <button id="fileOK" value="OK">upload</button>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+   
+
+        <div>
+            @RenderBody()
+        </div>
+
+</body>
+</html>

@@ -1,0 +1,242 @@
+﻿@model  List<EAD.Entities.FileDTO>
+    @{
+    ViewBag.Title = "UserHome";
+    Layout = "~/Views/Shared/_MyLayout.cshtml";
+    }
+    <head>
+        <title>homePage</title>
+        <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+        <script>
+            $(document).ready(function () {
+
+                var u = JSON.parse(window.localStorage.getItem('user'));
+                var basePath = '@Url.Content("~")';
+
+                //folder divs
+
+                var obj = { "userId": u.UserID };
+                var folderDiv = {
+                    type: "GET",
+                    dataType: "json",
+                    url: basePath + "api/Folder/showFolders",
+                    data: obj,
+                    success: function (list) {
+                        if (list != null) {
+                            for (var i = 0; i < list.length; i++) {
+                                $("#folderDiv").append('<div id=' + list[i].FolderID + ' class="folder"  style="display:block; float:left;border:1px solid #CCCCCC;padding:5px;margin:10px">' + list[i].Name + '</div>');
+                            }
+                            var DELAY = 200, clicks = 0, timer = 0;
+                            var id = 0;
+                            $(".folder").on("click", function (e) {
+                                clicks++;  //count clicks
+                                id = this.id;
+                                if (clicks === 1) {
+                                    timer = setTimeout(function () {
+                                      //  alert("Single Click");  //perform single-click action
+                                        clicks = 0;             //after action performed, reset counter
+                                        deleteFolder(id);
+                                    }, DELAY);
+                                }
+                                else {
+                                    clearTimeout(timer);    //prevent single-click action
+                                   // alert("Double Click");  //perform double-click action
+                                    window.localStorage.setItem("pid", id);
+                                    openFolder(id);
+
+                                    clicks = 0;             //after action performed, reset counter
+                                }
+                            })
+                            .on("dblclick", function (e) {
+                                e.preventDefault();  //cancel system double-click event
+                            });
+                        }
+                        else
+                            alert('No folders to show');
+                    },
+                    error: function () {
+                        alert('some problem has occured');
+                    }
+                };
+                $.ajax(folderDiv);
+
+
+                //download file
+
+                $(".download").click(function () {
+                    var fid = this.id;                   
+                    debugger;
+                    var url = 'http://localhost:53881/api/File/DownloadFile?uniqueName=' + fid;
+                    window.open(url);
+                });
+
+                //file delete
+                $(".fileClick").click(function () {
+                    console.log(this.id);
+                    debugger;
+                    var Id = this.id;
+                   
+                        var obj = { "fileId": Id };
+                        var settings = {
+                            type: "GET",
+                            dataType: "json",
+                            url: basePath + "api/File/DeleteFile",
+                            data: obj,
+                            success: function (r) {
+                                if (r == true) {
+                                    alert("file deleted");
+                                    location.reload();
+                                }
+                                else
+                                    alert('unable to delete file');
+                            },
+                            error: function () {
+                                alert('some problem has occured');
+                            }
+                        };
+                        $.ajax(settings);
+                    
+
+                });
+
+
+                //  pdf download
+                var pid = window.localStorage.getItem("pid");
+                if (pid > 0) {
+
+                    var link = $("<a>");
+                    link.attr("href", "#");
+                    link.attr("id", pid);
+                    link.attr("class", "pdf");
+                    link.text("Download Meta as PDF");
+                    $("#linkDiv").append(link);
+                }
+                $('.pdf').click(function (event) {
+
+                    var obj = { "pdfID": pid};
+                    var settings = {
+                        type: "GET",
+                        dataType: "json",
+                        url: basePath + "api/PdfHelper/generatePdf",
+                        data: obj,
+                        success: function (r) {
+                            if (r !=null) {
+                                alert("PDF generated")
+                                var pdfUrl = basePath + "docs/" + r;
+                                window.open(pdfUrl);
+                                }
+                            else
+                                alert('unable to generate PDF');
+                        },
+                        error: function () {
+                            alert('some problem has occured');
+                        }
+                    };
+                    $.ajax(settings);
+                    //To stop actual/default functionality of the link
+                    event.preventDefault();
+                    return false;
+                });
+
+
+
+
+
+
+                // single and double click
+
+                function deleteFolder(id) {
+                    console.log(id);
+                    var flag = confirm("Do you want to delete this folder?");
+                    if (flag == true) {
+                        var obj = { "folderId": id };
+                        var settings = {
+                            type: "GET",
+                            dataType: "json",
+                            url: basePath + "api/Folder/DeleteFolder",
+                            data: obj,
+                            success: function (r) {
+                                if (r == true) {
+                                    alert("folder deleted");
+                                    location.reload();
+                                }
+                                else
+                                    alert('unable to delete folder');
+                            },
+                            error: function () {
+                                alert('some problem has occured');
+                            }
+                        };
+                        $.ajax(settings);
+                    }
+                }
+
+                function openFolder(id) {
+                    var obj = { "pId": id };
+                    var settings = {
+                        type: "GET",
+                        dataType: "json",
+                        url: basePath + "api/Folder/OpenFolder",
+                        data: obj,
+                        success: function (list) {
+                            if (list != null) {
+                                $("#folderDiv").empty();
+                                for (var i = 0; i < list.length; i++) {
+                                    $("#folderDiv").append('<div id=' + list[i].FolderID + ' class="folder"  contextmenu="divDeletion" style="display:block; float:left;border:1px solid #CCCCCC;padding:5px;margin:10px">' + list[i].Name + '</div>');
+                                }
+                                var DELAY = 200, clicks = 0, timer = 0;
+                                var id = 0;
+                                $(".folder").on("click", function (e) {
+                                    clicks++;  //count clicks
+                                    id = this.id;
+                                    if (clicks === 1) {
+                                        timer = setTimeout(function () {
+                                         //   alert("Single Click");  //perform single-click action
+                                            clicks = 0;             //after action performed, reset counter
+                                            deleteFolder(id);
+                                        }, DELAY);
+                                    } else {
+                                        clearTimeout(timer);    //prevent single-click action
+                                      //  alert("Double Click");  //perform double-click action
+                                        openFolder(id);
+                                        clicks = 0;             //after action performed, reset counter
+                                    }
+                                })
+                                .on("dblclick", function (e) {
+                                    e.preventDefault();  //cancel system double-click event
+                                });
+                            }
+                            else
+                                alert('No folders to show');
+                        },
+                        error: function () {
+                            alert('some problem has occured');
+                        }
+                    };
+                    $.ajax(settings);
+                }
+
+
+
+            });
+
+        </script>
+    </head>
+    <body style="background-color:#c1b2a6">
+        <div id="folderDiv"></div>
+        <div>
+            
+                 <ul>
+                  @foreach (var file in Model)
+{
+    if (file.IsActive == true)
+    {
+        var id = file.FileID;
+        <li><img src='http://localhost:53881/api/File/GetThumbnail?id=@id' style='width:2%; height:2%'>
+                        <span class="fileClick" id=@file.FileID>@file.Name  </span><a href="#" id=@file.FileID class="download">download file</a></li>
+                        } 
+                    }
+                            </ul>
+               
+        </div>
+    </body>
+

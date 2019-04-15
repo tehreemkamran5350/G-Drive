@@ -1,0 +1,10 @@
+E:\6th semester\EAD\assignments\Assignment_8\EAD.Entities\bin\Debug\EAD.Entities.dll
+E:\6th semester\EAD\assignments\Assignment_8\EAD.Entities\bin\Debug\EAD.Entities.pdb
+E:\6th semester\EAD\assignments\Assignment_8\EAD.Entities\obj\Debug\EAD.Entities.csprojResolveAssemblyReference.cache
+E:\6th semester\EAD\assignments\Assignment_8\EAD.Entities\obj\Debug\EAD.Entities.dll
+E:\6th semester\EAD\assignments\Assignment_8\EAD.Entities\obj\Debug\EAD.Entities.pdb
+E:\6th semester\ead_s18_a8_bsef15m025\Assignment_8\EAD.Entities\bin\Debug\EAD.Entities.dll
+E:\6th semester\ead_s18_a8_bsef15m025\Assignment_8\EAD.Entities\bin\Debug\EAD.Entities.pdb
+E:\6th semester\ead_s18_a8_bsef15m025\Assignment_8\EAD.Entities\obj\Debug\EAD.Entities.csprojResolveAssemblyReference.cache
+E:\6th semester\ead_s18_a8_bsef15m025\Assignment_8\EAD.Entities\obj\Debug\EAD.Entities.dll
+E:\6th semester\ead_s18_a8_bsef15m025\Assignment_8\EAD.Entities\obj\Debug\EAD.Entities.pdb
